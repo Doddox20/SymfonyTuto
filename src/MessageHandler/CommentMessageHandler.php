@@ -5,7 +5,7 @@ use App\Repository\CommentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\NotificationEmail;
-use Symfony\Component\Mailer\MailerInterface
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
@@ -15,18 +15,21 @@ class CommentMessageHandler implements MessageHandlerInterface
     private $entityManager;
     private $bus;
     private $workflow;
+    private $mailer;
+    private $adminEmail;
     private $logger;
 
-    public function __construct(CommentRepository $commentRepository, EntityManagerInterface $entityManager, MessageBusInterface $bus, WorkflowInterface $commentStateMachine, LoggerInterface $logger)
+    public function __construct(CommentRepository $commentRepository, EntityManagerInterface $entityManager, MessageBusInterface $bus, WorkflowInterface $commentStateMachine, MailerInterface $mailer, string $adminEmail, LoggerInterface $logger)
     {
         $this->commentRepository = $commentRepository;
         $this->entityManager = $entityManager;
         $this->bus = $bus;
         $this->workflow = $commentStateMachine;
+        $this->mailer = $mailer;
+        $this->adminEmail = $adminEmail;
         $this->logger = $logger;
-    
-   
     }
+
 
     public function __invoke(CommentMessage $message)
     {
