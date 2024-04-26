@@ -53,6 +53,11 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return (string) $this->username;
     }
+    public function __toString(): string
+    {
+        return $this->username;
+    }
+
 
     /**
      * @see UserInterface
@@ -87,7 +92,7 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
+    
     /**
      * @see UserInterface
      */
@@ -96,8 +101,5 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
-    public function __toString(): string
-    {
-        return $this->username;
-    }
+    
 }
