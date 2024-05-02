@@ -1,5 +1,6 @@
 <?php
 namespace App\MessageHandler;
+use App\ImageOptimizer;
 use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,10 +17,12 @@ class CommentMessageHandler implements MessageHandlerInterface
     private $bus;
     private $workflow;
     private $mailer;
+    private $imageOptimizer;
     private $adminEmail;
+    private $photoDir;
     private $logger;
 
-    public function __construct(CommentRepository $commentRepository, EntityManagerInterface $entityManager, MessageBusInterface $bus, WorkflowInterface $commentStateMachine, MailerInterface $mailer, string $adminEmail, LoggerInterface $logger)
+    public function __construct(CommentRepository $commentRepository, EntityManagerInterface $entityManager, MessageBusInterface $bus, WorkflowInterface $commentStateMachine, MailerInterface $mailer, string $adminEmail, LoggerInterface $logger, string $photoDir, ImageOptimizer $imageOptimizer)
     {
         $this->commentRepository = $commentRepository;
         $this->entityManager = $entityManager;
@@ -28,7 +31,10 @@ class CommentMessageHandler implements MessageHandlerInterface
         $this->mailer = $mailer;
         $this->adminEmail = $adminEmail;
         $this->logger = $logger;
+        $this->photoDir = $photoDir;
+        $this->imageOptimizer = $imageOptimizer;
     }
+    
 
 
     public function __invoke(CommentMessage $message)
@@ -51,6 +57,13 @@ class CommentMessageHandler implements MessageHandlerInterface
                                         ->to($this->adminEmail)
                                         ->context(['comment' => $comment])
                                     );
+                                } elseif ($this->workflow->can($comment, 'optimize')) {
+                                    if ($comment->getPhotoFilename()) {
+                                        $this->imageOptimizer->resize($this->photoDir.'/'.$comment->getPhotoFilename());
+                                    }
+                                    $this->workflow->apply($comment, 'optimize');
+                                    $this->entityManager->flush();
+                                
 
                     } elseif ($this->logger) {
                         $this->logger->debug('Dropping comment message', ['comment' => $comment->getId(), 'state' => $comment->getState()]);
