@@ -7,6 +7,7 @@ parameters:
     default_admin_email: admin@example.com
     default_domain: '127.0.0.1'
     default_sheme: 'http'
+    app.supported_locales: 'en|fr'
 
     router.request_context.host: '%env(default:default_domain:SYMFONY_DEFAULT_ROUTE_HOST)%'
     router.request_context.scheme: '%env(default:default_sheme:SYMFONY_DEFAULT_ROUTE_SCHEME)%'
@@ -31,3 +32,4 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    Symfony\Component\HttpKernel\HTTPCache\StoreInterface: '@htp_cache.store'
